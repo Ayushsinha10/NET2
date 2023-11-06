@@ -24,17 +24,13 @@ public class DMBClient {
     c_ = new Configuration("cs2003-net2.properties");
 
     try {
-        server = c_.serverAddress;
-        port = c_.serverPort;
+        server = c_.getAddress();
+        port = c_.getPort();
     }
     catch (NumberFormatException e) {
         System.out.println("can't configure port: " + e.getMessage());
     }
 
-    if (args.length != 1) { // user has not provided arguments
-      System.out.println("\n DMBClient <string>\n");
-      System.exit(0);
-    }
 
     try {
       Socket       connection;
@@ -48,8 +44,12 @@ public class DMBClient {
       connection = startClient(server, port);
       tx = connection.getOutputStream();
       rx = connection.getInputStream();
-
-      buffer = args[0].getBytes();
+      String input;
+     try{ 
+    while(true){
+      BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+      input = reader.readLine();
+      buffer = input.getBytes();
       r = buffer.length;
       if (r > maxTextLen_) {
         System.out.println("++ You entered more than " + maxTextLen_ + "bytes ... truncating.");
@@ -57,15 +57,18 @@ public class DMBClient {
       }
       System.out.println("Sending " + r + " bytes");
       tx.write(buffer, 0, r); // to server
-
-      System.out.print("\n++ Closing connection ... ");
-      connection.close();
-      System.out.println("... closed.");
     }
+  
+    }
+  catch (SocketException e){
+      connection.close();
+    }
+  }
 
     catch (IOException e) {
       System.err.println("IO Exception: " + e.getMessage());
     }
+    
   } // main
 
   static Socket startClient(String hostname, int portnumber)

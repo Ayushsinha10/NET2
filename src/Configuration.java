@@ -16,31 +16,29 @@ import java.util.Properties;
 public class Configuration
 
 {
-  public String serverAddress;
-  public int serverPort;
-  public Properties    properties_;
-  public String        propertiesFile_ = "server.properties";
+  private String serverAddress;
+  private int serverPort;
+  private String dir;
+  private Properties    properties_;
 
-  public String        logFile_ = "server.log";
+
+  private String        logFile_ = "server.log";
 
   // These default values can be overriden in the properties file.
-  public String     serverName_="Test UDP Server"; // A name for the server
-  public int        port_=12345; // A default port value
 
-  Configuration(String propertiesFile)
+  public Configuration(String propertiesFile)
   {
-    if (propertiesFile != null) {
-        propertiesFile_ = propertiesFile;
-    }
+
 
     try {
       properties_ = new Properties();
-      InputStream p = getClass().getClassLoader().getResourceAsStream(propertiesFile_);
+      InputStream p = getClass().getClassLoader().getResourceAsStream(propertiesFile);
       if (p != null) {
         properties_.load(p);
 
            this.serverAddress = properties_.getProperty("serverAddress");
            this.serverPort = Integer.valueOf(properties_.getProperty("serverPort"));
+           this.dir = properties_.getProperty("boardDirectory");
         p.close();
       }
 
@@ -58,5 +56,14 @@ public class Configuration
       System.out.println("Problem: " + e.getMessage());
     }
 
+  }
+  public int getPort(){
+    return this.serverPort;
+  }
+  public String getAddress(){
+    return this.serverAddress;
+  }
+  public String getBoard(){
+    return dir;
   }
 }
