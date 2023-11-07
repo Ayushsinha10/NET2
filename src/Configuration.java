@@ -19,6 +19,7 @@ public class Configuration
   private String serverAddress;
   private int serverPort;
   private String dir;
+  private String csv;
   private Properties    properties_;
 
 
@@ -39,6 +40,7 @@ public class Configuration
            this.serverAddress = properties_.getProperty("serverAddress");
            this.serverPort = Integer.valueOf(properties_.getProperty("serverPort"));
            this.dir = properties_.getProperty("boardDirectory");
+           this.csv = properties_.getProperty("directoryFile");
         p.close();
       }
 
@@ -65,5 +67,8 @@ public class Configuration
   }
   public String getBoard(){
     return dir;
+  }
+    public String getCSV(){
+    return csv;
   }
 }

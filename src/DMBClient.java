@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
 import java.util.Properties;
 
 
@@ -37,8 +38,7 @@ public class DMBClient {
       OutputStream tx;
       InputStream  rx;
       byte[]       buffer;
-      String       s = new String("");
-      String       quit = new String("quit");
+
       int          r;
 
       connection = startClient(server, port);
@@ -49,6 +49,27 @@ public class DMBClient {
     while(true){
       BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
       input = reader.readLine();
+      if(input.startsWith("%%to")){
+        HashMap<String, String> list = CSV();
+       
+        String[] task = input.split(" ");
+        if(list.get(task[1]) == null){
+          continue;
+
+        }
+        Socket con2 = startClient(task[1] + ".teaching.st-andrews.ac.uk", Integer.valueOf(list.get(task[1])));
+        OutputStream tx2 = connection.getOutputStream();
+        buffer = task[2].getBytes();
+        r = buffer.length;
+        if (r > maxTextLen_) {
+        System.out.println("++ You entered more than " + maxTextLen_ + "bytes ... truncating.");
+        r = maxTextLen_;
+        
+      }
+      tx2.write(buffer, 0, r); // to server
+      con2.close();
+      continue;
+      }
       buffer = input.getBytes();
       r = buffer.length;
       if (r > maxTextLen_) {
@@ -98,5 +119,25 @@ public class DMBClient {
 
     return connection;
   } // startClient
+  public static HashMap<String, String> CSV(){
+    String line = "";
+    HashMap<String, String> list = new HashMap<>();
+     c_ = new Configuration("cs2003-net2.properties");
+    try (BufferedReader br = new BufferedReader(new FileReader(c_.getCSV()))) {
 
+      while ((line = br.readLine()) != null) {
+
+       
+          String[] student = line.split(",");
+
+       
+          list.put(student[0], student[1]);
+      }
+
+  } catch (IOException e) {
+      e.printStackTrace();
+  }
+  return list;
+
+  }
 } // DMBClient
