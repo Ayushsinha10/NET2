@@ -1,16 +1,7 @@
-/*
-  Using java.util.Properties to demonstrate configuration information
-  
-  Based on code from Saleem Bhatti
-  Sep 2019
-  Oct 2018
 
-*/
 
 import java.io.*;
 import java.net.*;
-
-// https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Properties.html
 import java.util.Properties;
 
 public class Configuration
@@ -20,12 +11,10 @@ public class Configuration
   private int serverPort;
   private String dir;
   private String csv;
+  private String user;
   private Properties    properties_;
 
 
-  private String        logFile_ = "server.log";
-
-  // These default values can be overriden in the properties file.
 
   public Configuration(String propertiesFile)
   {
@@ -41,6 +30,7 @@ public class Configuration
            this.serverPort = Integer.valueOf(properties_.getProperty("serverPort"));
            this.dir = properties_.getProperty("boardDirectory");
            this.csv = properties_.getProperty("directoryFile");
+           this.user = properties_.getProperty("user");
         p.close();
       }
 
@@ -70,5 +60,8 @@ public class Configuration
   }
     public String getCSV(){
     return csv;
+  }
+      public String getUser(){
+    return user;
   }
 }

@@ -2,23 +2,12 @@ import java.io.*;
 import java.net.*;
 import java.text.*;
 import java.util.*;
-/**
- * Simple, non-blocking TCP server, checks before reading
- *
- * Saleem Bhatti, https://saleem.host.cs.st-andrews.ac.uk/
- *
- * Sepetember 2019
- * September 2018
- * February 2007
- *
- */
-
 public class DMBServer{
 
 
   static ServerSocket  server_;
   static int           sleepTime_ = 100; // milliseconds
-  static int           bufferSize_ = 80; // a line
+  static int           bufferSize_ = 256; 
   static int           soTimeout_ = 10; // 10 ms
 
   public static void main(String[] args) {
@@ -33,16 +22,26 @@ public class DMBServer{
       tx = connection.getOutputStream();
       rx = connection.getInputStream();
       server_.close(); // no need to wait now
-
+      
       System.out.println("New connection ... " +
         connection.getInetAddress().getHostName() + ":" +
         connection.getPort());
+        connection.setKeepAlive(true);
     try{
     while(true){
       byte[] buffer = new byte[bufferSize_];
       int b = 0;
       while (b < 1) {
         Thread.sleep(sleepTime_);
+        try{
+          byte[] b3 = new byte[1];
+          tx.write(b3, 0, 1);
+        }
+        catch(IOException e){
+          connection.close();
+          return;
+
+        }
 
         buffer = new byte[bufferSize_];
         b = rx.read(buffer);
@@ -51,17 +50,13 @@ public class DMBServer{
       if (b > 0) {
         String s = new String(buffer);
         FileDir(buffer);
-        System.out.println("Received " + b + " bytes --> " + s);
-
-        System.out.println("Sending " + b + " bytes");
-        tx.write(buffer, 0, b); // send data back to client
-   
-        
+        System.out.println("Received " + b + " bytes --> " + s);      
       }
     }
   }
   catch (SocketException e){
     connection.close();
+    return;
   }
     }
 
@@ -100,7 +95,7 @@ public class DMBServer{
     Configuration C = new Configuration("cs2003-net2.properties");
     try{
     File dir = new File(C.getBoard() + "/"+s2);
-    System.out.println(C.getBoard() + "/"+s2);
+
   
     if (dir.exists()) {
       File file = new File(C.getBoard() +"/"+s2+"/"+s);

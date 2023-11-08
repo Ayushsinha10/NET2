@@ -2,14 +2,6 @@ import java.io.*;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Properties;
-
-
-/**
-  * Daily Message Board Client
-  *
-  * based on code by Saleem Bhatti, 28 Aug 2019
-  *
-  */
 public class DMBClient {
 
   static int maxTextLen_ = 256;
@@ -38,28 +30,37 @@ public class DMBClient {
       OutputStream tx;
       InputStream  rx;
       byte[]       buffer;
-
       int          r;
 
       connection = startClient(server, port);
       tx = connection.getOutputStream();
-      rx = connection.getInputStream();
+      connection.setKeepAlive(true);
       String input;
      try{ 
     while(true){
       BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
       input = reader.readLine();
+      
+
       if(input.startsWith("%%to")){
         HashMap<String, String> list = CSV();
-       
+        String message = "";
         String[] task = input.split(" ");
+        if (task.length == 1){
+          System.out.println("%%to rrrr mmmmmmm");
+          continue;
+        }
         if(list.get(task[1]) == null){
           continue;
 
         }
-        Socket con2 = startClient(task[1] + ".teaching.st-andrews.ac.uk", Integer.valueOf(list.get(task[1])));
-        OutputStream tx2 = connection.getOutputStream();
-        buffer = task[2].getBytes();
+        Socket con2 = startClient(task[1] + ".teaching.cs.st-andrews.ac.uk", Integer.valueOf(list.get(task[1])));
+        OutputStream tx2 = con2.getOutputStream();
+        for(int i = 2; i < task.length; i++){
+          message = message+task[i]+" ";
+        }
+        String output = "from "+c_.getUser()+ " "+message;
+        buffer = output.getBytes();
         r = buffer.length;
         if (r > maxTextLen_) {
         System.out.println("++ You entered more than " + maxTextLen_ + "bytes ... truncating.");
@@ -67,7 +68,7 @@ public class DMBClient {
         
       }
       tx2.write(buffer, 0, r); // to server
-      con2.close();
+     con2.close();
       continue;
       }
       buffer = input.getBytes();
@@ -82,12 +83,18 @@ public class DMBClient {
   
     }
   catch (SocketException e){
+      System.out.println("Connection Broken!");
       connection.close();
     }
   }
 
     catch (IOException e) {
+      
       System.err.println("IO Exception: " + e.getMessage());
+     
+    }
+    catch(NullPointerException e){
+
     }
     
   } // main
@@ -126,12 +133,8 @@ public class DMBClient {
     try (BufferedReader br = new BufferedReader(new FileReader(c_.getCSV()))) {
 
       while ((line = br.readLine()) != null) {
-
-       
-          String[] student = line.split(",");
-
-       
-          list.put(student[0], student[1]);
+        String[] student = line.split(",");
+        list.put(student[0], student[1]);
       }
 
   } catch (IOException e) {
